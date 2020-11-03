@@ -1,0 +1,4 @@
+docker build . -t vote
+python -m pip install --upgrade pip
+docker run -d -p 5001:80 -e REDIS=192.168.1.162 -e REDIS_PORT=6379  -e REDIS_PWD=redis --name vote2 vote
+docker run -d -p 6379:6379   -e REDIS_PASSWORD=redis --name redis redis /bin/sh -c 'redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}'
