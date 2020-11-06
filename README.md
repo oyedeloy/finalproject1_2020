@@ -1,12 +1,12 @@
-# Voting app Using Redis and Flask
+# Voting app Using Redis and Flask [Techbleat Final Project ]
 
 A simple voting app that uses Redis for a data store and a Python Flask app for the frontend.
 
 - 
-- Builds the Docker image
-- Provisions AWS Container Registry (ECR) instance
-- Pushes the image to the ECR instance
-- Creates a new ECS task definition, pointing to the ECR image definition
+- Build  Docker image
+- Publish image to Docker hub
+- Deploy image as container on blue|green enviornment 
+- 
 
 ## Prerequisites
 
@@ -91,9 +91,7 @@ Use Amazon  EC2 as node
 The application is a voting app , written in Python Flask.
 
 ### Resources
-The definition of `frontend` is more interesting, as it uses `image` property of `FargateService.taskDefinitionArgs` to point to a folder with a Dockerfile, which in this case is a Python Flask app. Pulumi automatically invokes `docker build` for you and pushes the container to ECR.
-
-So that the `frontend` container can connect to `redisCache`, the environment variables `REDIS`, `REDIS_PORT` are defined. Using the `redisListenre.endpoint` property, it's easy to declare the connection between the two containers.
+The environment variables `REDIS`, `REDIS_PORT`  and `REDIS_PWD` are required for the app.
 
 The Flask app uses these environment variables to connect to the Redis cache container. See the following in [`frontend/app/main.py`](frontend/app/main.py):
 
@@ -101,4 +99,25 @@ The Flask app uses these environment variables to connect to the Redis cache con
 redis_server =   os.environ['REDIS']
 redis_port =     os.environ['REDIS_PORT']
 redis_password = os.environ['REDIS_PWD']
+
+```
+
+### Building the app
+
+This is only to serve as a guide . Please research or check with the developer.
+
+```
+docker build . -t shegoj/techbleatapp
+docker login 
+docker push  shegoj/techbleatapp
+```
+run app on target node as 
+```
+docker run -d -p 5001:80 -e REDIS=192.168.1.162 -e REDIS_PORT=6379  -e REDIS_PWD=redis --name blue-app shegoj/techbleatapp
+```
+
+run redis [ single nodes ] as 
+
+```
+docker run -d -p 6379:6379   -e REDIS_PASSWORD=redis --name redis redis /bin/sh -c 'redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}'
 ```
